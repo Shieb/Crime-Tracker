@@ -66,7 +66,26 @@ app.get('/neighborhoods', (req, res) => {
 app.get('/incidents', (req, res) => {
     let url = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
 
-    res.status(200).type('json').send({});
+    let sql = 'SELECT * from Incidents';
+    db.all(sql, (err, rows) => {
+        var allIncidents = [];
+        for(let i = 0; i < rows.length; i++)
+        {
+            let time = rows[i].date_time.split("T");
+            let incident = {
+                case_number: rows[i].case_number,
+                date: time[0],
+                time: time[1],
+                code: rows[i].code,
+                incident: rows[i].incident,
+                police_grid: rows[i].police_grid,
+                neighborhood_number: rows[i].neighborhood_number,
+                block: rows[i].block
+            };
+            allIncidents.push(incident);
+        }
+        res.status(200).type('json').send(allIncidents);
+    });
 });
 
 // REST API: PUT /new-incident
