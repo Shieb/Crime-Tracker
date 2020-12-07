@@ -32,7 +32,10 @@ app.use(express.static(public_dir));
 app.get('/codes', (req, res) => {
     let url = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
     
-    res.status(200).type('json').send({});
+    let sql = 'SELECT * from Codes';
+    db.all(sql, (err, rows) => {
+        res.status(200).type('json').send(rows);
+    });
 });
 
 // REST API: GET /neighborhoods
