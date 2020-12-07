@@ -34,8 +34,7 @@ app.get('/codes', (req, res) => {
     
     let sql = 'SELECT * from Codes';
     db.all(sql, (err, rows) => {
-        var allCodes = [
-        ];
+        var allCodes = [];
         for(let i = 0; i < rows.length; i++)
         {
             let code = {code: rows[i].code, type: rows[i].incident_type}
@@ -50,7 +49,16 @@ app.get('/codes', (req, res) => {
 app.get('/neighborhoods', (req, res) => {
     let url = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
 
-    res.status(200).type('json').send({});
+    let sql = 'SELECT * from Neighborhoods';
+    db.all(sql, (err, rows) => {
+        var allNeighborhoods = [];
+        for(let i = 0; i < rows.length; i++)
+        {
+            let neighborhood = {id: rows[i].neighborhood_number, name: rows[i].neighborhood_name}
+            allNeighborhoods.push(neighborhood);
+        }
+        res.status(200).type('json').send(allNeighborhoods);
+    });
 });
 
 // REST API: GET/incidents
