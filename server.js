@@ -34,7 +34,14 @@ app.get('/codes', (req, res) => {
     
     let sql = 'SELECT * from Codes';
     db.all(sql, (err, rows) => {
-        res.status(200).type('json').send(rows);
+        var allCodes = [
+        ];
+        for(let i = 0; i < rows.length; i++)
+        {
+            let code = {code: rows[i].code, type: rows[i].incident_type}
+            allCodes.push(code);
+        }
+        res.status(200).type('json').send(allCodes);
     });
 });
 
