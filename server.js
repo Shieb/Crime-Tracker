@@ -84,6 +84,7 @@ app.get('/incidents', (req, res) => {
             };
             allIncidents.push(incident);
         }
+        console.log("neighborhoods");
         res.status(200).type('json').send(allIncidents);
     });
 });
@@ -93,7 +94,34 @@ app.get('/incidents', (req, res) => {
 app.put('/new-incident', (req, res) => {
     let url = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
 
-    res.status(200).type('txt').send('success');
+    let caseNum = parseInt(url.searchParams.get('case_number'));
+    let date = url.searchParams.get('date');
+    let time = url.searchParams.get('time');
+    let date_time = date + "T" + time;
+    let code = url.searchParams.get('code');
+    let incident = url.searchParams.get('incident');
+    let police_grid = parseInt(url.searchParams.get('police_grid'));
+    let neighborhood = parseInt(url.searchParams.get('neighborhood_number'));
+    let block = url.searchParams.get('block');
+
+    console.log(caseNum);
+    let sql = 'SELECT * from Incidents WHERE case_number = ?';
+    db.all(sql, caseNum, (err, rows) => {
+        if(rows.length > 0)
+            res.status(500).type('txt').send('ERROR: Incident # already exists');
+    
+        else
+        {
+            sql = 'INSERT INTO Incidents VALUES (?, ?, ?, ?, ?, ?, ?)';
+            let param =  [caseNum, date_time, code, incident, police_grid, neighborhood, block];
+            db.all(sql, param, (err) => {
+                if(err)
+                    res.status(404).type('txt').send('failure');
+                else
+                    res.status(200).type('txt').send('success');
+            });
+        }
+        });
 });
 
 

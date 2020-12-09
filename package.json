@@ -3,13 +3,14 @@
     "version": "0.0.0",
     "description": "RESTful Web Server and Single Page Application",
     "author": {
-        "name": "",
-        "email": ""
+        "name": "Josh Ringling",
+        "email": "joshringling@yahoo.com"
     },
+    "contributors": ["Stephan Hedman"],
     "main": "server.js",
     "repository": {
         "type": "git",
-        "url": ""
+        "url": "https://github.com/Shieb/Crime-Tracker"
     },
     "dependencies": {
         "express": "^4.17.1",
