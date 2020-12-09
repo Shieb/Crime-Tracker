@@ -31,34 +31,83 @@ app.use(express.static(public_dir));
 // Respond with list of codes and their corresponding incident type
 app.get('/codes', (req, res) => {
     let url = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
-    
-    let sql = 'SELECT * from Codes';
-    db.all(sql, (err, rows) => {
-        var allCodes = [];
-        for(let i = 0; i < rows.length; i++)
+    let askCodes = url.searchParams.get('code');
+    let sql = '';
+    let params = '';
+    if(askCodes == null)
+    {
+        sql = 'SELECT * from Codes';
+        db.all(sql, (err, rows) => {
+            var allCodes = [];
+            for(let i = 0; i < rows.length; i++)
+            {
+                let code = {code: rows[i].code, type: rows[i].incident_type}
+                allCodes.push(code);
+            }
+            res.status(200).type('json').send(allCodes);
+        });
+    }
+    else
+    {
+        params = askCodes.split(",");
+        sql = 'SELECT * from Codes WHERE code = ? ';
+        console.log(params.length);
+        for(let i = 1; i < params.length; i++)        
         {
-            let code = {code: rows[i].code, type: rows[i].incident_type}
-            allCodes.push(code);
+            sql = sql + 'OR code = ?';
         }
-        res.status(200).type('json').send(allCodes);
-    });
+        db.all(sql, params, (err, rows) => {
+            var allCodes = [];
+            for(let i = 0; i < rows.length; i++)
+            {
+                let code = {code: rows[i].code, type: rows[i].incident_type}
+                allCodes.push(code);
+            }
+            res.status(200).type('json').send(allCodes);
+        });
+    }
+    
 });
 
 // REST API: GET /neighborhoods
 // Respond with list of neighborhood ids and their corresponding neighborhood name
 app.get('/neighborhoods', (req, res) => {
     let url = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
+    let askIds = url.searchParams.get('id');
+    let sql = '';
+    let params = '';
+    if(askIds == null)
+    {
+        sql = 'SELECT * from Neighborhoods';
+        db.all(sql, (err, rows) => {
+            var allNeighborhoods = [];
+            for(let i = 0; i < rows.length; i++)
+            {
+                let neighborhood = {id: rows[i].neighborhood_number, name: rows[i].neighborhood_name}
+                allNeighborhoods.push(neighborhood);
+            }
+            res.status(200).type('json').send(allNeighborhoods);
+        });
+    }
+    else
+    {
+        params = askIds.split(",");
+        sql = 'SELECT * from Neighborhoods WHERE neighborhood_number = ?';
 
-    let sql = 'SELECT * from Neighborhoods';
-    db.all(sql, (err, rows) => {
-        var allNeighborhoods = [];
-        for(let i = 0; i < rows.length; i++)
+        for(let i = 1; i < params.length; i++)        
         {
-            let neighborhood = {id: rows[i].neighborhood_number, name: rows[i].neighborhood_name}
-            allNeighborhoods.push(neighborhood);
+            sql = sql + ' OR neighborhood_number = ?';
         }
-        res.status(200).type('json').send(allNeighborhoods);
-    });
+        db.all(sql, params, (err, rows) => {
+            var allNeighborhoods = [];
+            for(let i = 0; i < rows.length; i++)
+            {
+                let neighborhood = {id: rows[i].neighborhood_number, name: rows[i].neighborhood_name}
+                allNeighborhoods.push(neighborhood);
+            }
+            res.status(200).type('json').send(allNeighborhoods);
+        });
+    }
 });
 
 // REST API: GET/incidents
@@ -66,27 +115,119 @@ app.get('/neighborhoods', (req, res) => {
 app.get('/incidents', (req, res) => {
     let url = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
 
-    let sql = 'SELECT * from Incidents';
-    db.all(sql, (err, rows) => {
-        var allIncidents = [];
-        for(let i = 0; i < rows.length; i++)
+    let start = url.searchParams.get('start_date');
+    let end = url.searchParams.get('end_date');
+    let code = url.searchParams.get('code');
+    let grid = url.searchParams.get('grid');
+    let neighborhood = url.searchParams.get('neighborhood');
+    let limit = parseInt(url.searchParams.get('limit'));
+    
+    var params = [];
+    let search = false;
+
+    let sql = 'SELECT * from Incidents WHERE (1=1';
+    if(start != null)
+    {
+        sql = sql + ' AND (SUBSTR(date_time, 1, 10) >= ?)'
+        params.push(start);
+        search = true;
+    }
+    if(end != null)
+    {
+        sql = sql + ' AND (SUBSTR(date_time, 1, 10) <= ?)'
+        params.push(end);
+        search = true;
+    }
+    if(code != null)
+    {
+        let searchCodes = code.split(",");
+        sql = sql + ' AND (code = ?'
+        params.push(searchCodes[0]);
+        for(let i = 1; i < searchCodes.length; i++)        
         {
-            let time = rows[i].date_time.split("T");
-            let incident = {
-                case_number: rows[i].case_number,
-                date: time[0],
-                time: time[1],
-                code: rows[i].code,
-                incident: rows[i].incident,
-                police_grid: rows[i].police_grid,
-                neighborhood_number: rows[i].neighborhood_number,
-                block: rows[i].block
-            };
-            allIncidents.push(incident);
+            params.push(parseInt(searchCodes[i]));
+            sql = sql + ' OR code = ?';
         }
-        console.log("neighborhoods");
-        res.status(200).type('json').send(allIncidents);
-    });
+        sql = sql + ')';
+        search = true;
+    }
+    if(grid != null)
+    {
+        let searchGrids = grid.split(",");
+        sql = sql + ' AND (police_grid = ?'
+        params.push(searchGrids[0]);
+        for(let i = 1; i < searchGrids.length; i++)        
+        {
+            params.push(parseInt(searchGrids[i]));
+            sql = sql + ' OR police_grid = ?';
+        }
+        sql = sql + ')';
+        search = true;
+
+    }
+    if(neighborhood != null)
+    {
+        let searchNeighbor = neighborhood.split(",");
+        sql = sql + ' AND (neighborhood_number = ?'
+        params.push(searchNeighbor[0]);
+        for(let i = 1; i < searchNeighbor.length; i++)        
+        {
+            params.push(parseInt(searchNeighbor[i]));
+            sql = sql + ' OR neighborhood_number = ?';
+        }
+        sql = sql + ')';
+        search = true;
+
+    }
+
+    console.log(params);
+    sql = sql + ');';
+    if (search)
+    {
+        db.all(sql, params, (err, rows) => {
+            var allIncidents = [];
+            if (limit == null)
+                limit = rows.length;
+            for(let i = 0; i < limit; i++)
+            {
+                let time = rows[i].date_time.split("T");
+                let incident = {
+                    case_number: rows[i].case_number,
+                    date: time[0],
+                    time: time[1],
+                    code: rows[i].code,
+                    incident: rows[i].incident,
+                    police_grid: rows[i].police_grid,
+                    neighborhood_number: rows[i].neighborhood_number,
+                    block: rows[i].block
+                };
+                allIncidents.push(incident);
+            }
+            res.status(200).type('json').send(allIncidents);
+        });
+    }
+    else
+    {
+        db.all(sql, (err, rows) => {
+            var allIncidents = [];
+            for(let i = 0; i < rows.length; i++)
+            {
+                let time = rows[i].date_time.split("T");
+                let incident = {
+                    case_number: rows[i].case_number,
+                    date: time[0],
+                    time: time[1],
+                    code: rows[i].code,
+                    incident: rows[i].incident,
+                    police_grid: rows[i].police_grid,
+                    neighborhood_number: rows[i].neighborhood_number,
+                    block: rows[i].block
+                };
+                allIncidents.push(incident);
+            }
+            res.status(200).type('json').send(allIncidents);
+        });
+    }
 });
 
 // REST API: PUT /new-incident
