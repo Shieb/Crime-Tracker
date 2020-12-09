@@ -180,14 +180,19 @@ app.get('/incidents', (req, res) => {
 
     }
 
-    console.log(params);
+    console.log("Search params: " + params);
     sql = sql + ');';
     if (search)
     {
         db.all(sql, params, (err, rows) => {
             var allIncidents = [];
-            if (limit == null)
-                limit = rows.length;
+            if (Number.isNaN(limit))
+            {
+                if (rows.length > 1000)
+                    limit = 1000;
+                else
+                    limit = rows.length;
+            }
             for(let i = 0; i < limit; i++)
             {
                 let time = rows[i].date_time.split("T");
@@ -209,8 +214,16 @@ app.get('/incidents', (req, res) => {
     else
     {
         db.all(sql, (err, rows) => {
+            
             var allIncidents = [];
-            for(let i = 0; i < rows.length; i++)
+            if (Number.isNaN(limit))
+            {
+                if (rows.length > 1000)
+                    limit = 1000;
+                else
+                    limit = rows.length;
+            }
+            for(let i = 0; i < limit; i++)
             {
                 let time = rows[i].date_time.split("T");
                 let incident = {
