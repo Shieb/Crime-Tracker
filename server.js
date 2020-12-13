@@ -181,7 +181,7 @@ app.get('/incidents', (req, res) => {
     }
 
     console.log("Search params: " + params);
-    sql = sql + ');';
+    sql = sql + ') ORDER BY date_time DESC;';
     if (search)
     {
         db.all(sql, params, (err, rows) => {
