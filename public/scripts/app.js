@@ -50,7 +50,8 @@ function init() {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         minZoom: 11,
-        maxZoom: 18
+        maxZoom: 18,
+        dragging: true
     }).addTo(map);
     map.setMaxBounds([[44.883658, -93.217977], [45.008206, -92.993787]]);
     
@@ -79,10 +80,31 @@ function init() {
     });
 }
 
-function search() {
-    query = app.search_bar;
-    app.search_bar = "";
+function search() 
+{
+    let query = app.search_bar;
     console.log(query);
+    getJSON('https://nominatim.openstreetmap.org/search?format=json&q=' + query + 'Saint Paul, Minnesota').then((result) => {
+        console.log(result);
+        if (result.length == 0)
+        {
+            console.log('Error: no such address or object');
+            app.search_bar = "";
+        }
+        else
+        {
+            app.map.center.lat = parseFloat(result[0].lat);
+            app.map.center.lng = parseFloat(result[0].lon);
+            console.log(app.map.center.lat);
+            map = map.panTo(new L.LatLng(app.map.center.lat, app.map.center.lng));
+            map.setZoom(17);
+            app.search_bar = result[0].display_name;
+            app.map.center.address = result[0].display_name;
+            console.log(app.map.bounds.nw);
+        }
+    });
+
+
 }
 
 function getJSON(url) {
