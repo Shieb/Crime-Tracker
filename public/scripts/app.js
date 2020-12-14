@@ -23,6 +23,7 @@ let neighborhood_markers =
 
 function init() {
     let crime_url = 'http://localhost:8000';
+    let query;
 
     app = new Vue({
         el: '#app',
@@ -38,7 +39,10 @@ function init() {
                     nw: {lat: 45.008206, lng: -93.217977},
                     se: {lat: 44.883658, lng: -92.993787}
                 }
-            }
+            },
+            codes: [],
+            neighborhoods: [],
+            search_bar: ""
         }
     });
 
@@ -61,6 +65,24 @@ function init() {
     }).catch((error) => {
         console.log('Error:', error);
     });
+
+    getJSON('/codes').then((result) =>{
+        app.codes = result;
+    }).catch((error) => {
+        console.log('Error:', error);
+    });
+
+    getJSON('/neighborhoods').then((result) =>{
+        app.neighborhoods = result;
+    }).catch((error) => {
+        console.log('Error:', error);
+    });
+}
+
+function search() {
+    query = app.search_bar;
+    app.search_bar = "";
+    console.log(query);
 }
 
 function getJSON(url) {
