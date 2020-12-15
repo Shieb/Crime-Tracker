@@ -100,7 +100,7 @@ function search()
             map.setZoom(17);
             app.search_bar = result[0].display_name;
             app.map.center.address = result[0].display_name;
-            console.log(app.map.bounds.nw);
+            //console.log(app.map.bounds.nw);
         }
     });
 
