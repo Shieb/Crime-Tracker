@@ -42,8 +42,12 @@ function init() {
             },
             codes: [],
             neighborhoods: [],
-            search_bar: ""
+            incidents: [],
+            search_bar: "",
+            code_dictionary: {},
+            visible_neighborhoods: [1,2,3]
         }
+
     });
 
     map = L.map('leafletmap').setView([app.map.center.lat, app.map.center.lng], app.map.zoom);
@@ -54,6 +58,15 @@ function init() {
         dragging: true
     }).addTo(map);
     map.setMaxBounds([[44.883658, -93.217977], [45.008206, -92.993787]]);
+
+    map.on("zoomend",updateVisibleNeighborhoods);
+    map.on("moveend",updateVisibleNeighborhoods);
+
+    let i;
+    for(i = 0; i<neighborhood_markers.length;i++){
+        neighborhood_markers[i].marker = L.marker(neighborhood_markers[i].location).addTo(map);
+        //neighborhood_markers[i].marker.bindPopup('Hello');
+    }
     
     let district_boundary = new L.geoJson();
     district_boundary.addTo(map);
@@ -69,6 +82,12 @@ function init() {
 
     getJSON('/codes').then((result) =>{
         app.codes = result;
+        let code_dictionary = {};
+        let i;
+        for(i = 0; i<app.codes.length; i++){
+            code_dictionary[app.codes[i].code] = app.codes[i].type;
+        }
+        app.code_dictionary = code_dictionary;
     }).catch((error) => {
         console.log('Error:', error);
     });
@@ -78,6 +97,27 @@ function init() {
     }).catch((error) => {
         console.log('Error:', error);
     });
+
+    getJSON('/incidents').then((result) =>{
+        app.incidents = result;
+        console.log(app.incidents)
+        for(i = 0; i<neighborhood_markers.length;i++){
+            let j;
+            let count=0;
+            for(j=0;j<app.incidents.length; j++){
+                if(i+1== app.incidents[j].neighborhood_number){
+                    count = count + 1;
+                }
+            }
+            neighborhood_markers[i].marker.bindPopup(count + ' total crimes');
+        }
+    }).catch((error) => {
+        console.log('Error:', error);
+    });
+}
+
+function updateVisibleNeighborhoods(){
+    console.log("map interaction finished");
 }
 
 function search() 
