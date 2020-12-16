@@ -33,6 +33,7 @@
     </br>
         <button type="button" @click="search">Go</button>
         <p>EX:120 W Kellogg Blvd, St Paul, MN 55102</p>
+<<<<<<< HEAD
     </br>
         <table>
             <tr>
@@ -56,6 +57,33 @@
                 <td>{{ item.block }}</td>
             </tr>
         </table>
+=======
+        <br>
+        <div class="table-wrapper">
+            <table class="fl-table">
+                <tr>
+                    <td> Case Number </td>
+                    <td> Date </td>
+                    <td> Time </td>
+                    <td> Crime Type </td>
+                    <td> Incident </td>
+                    <td> Police Grid </td>
+                    <td> Neighborhood Number </td>
+                    <td> Block </td>
+                </tr>
+                <tr v-for="item in incidents" v-if="visible_neighborhoods.includes(item.neighborhood_number)">
+                    <td>{{ item.case_number }}</td>
+                    <td>{{ item.date }}</td>
+                    <td>{{ item.time }}</td>
+                    <td>{{ code_dictionary[item.code] }}</td>
+                    <td>{{ item.incident }}</td>
+                    <td>{{ item.police_grid }}</td>
+                    <td>{{ item.neighborhood_number }}</td>
+                    <td>{{ item.block }}</td>
+                </tr>
+            </table>
+        </div>
+>>>>>>> 87a71b6a4dffbd95efd1df92e69f8c76a9497094
     </div>
 
     <a href="../about.html">About the project</a>
