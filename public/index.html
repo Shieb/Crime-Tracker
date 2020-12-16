@@ -34,28 +34,30 @@
         <button type="button" @click="search">Go</button>
         <p>EX:120 W Kellogg Blvd, St Paul, MN 55102</p>
         <br>
-        <table>
-            <tr>
-                <td> case number </td>
-                <td> date </td>
-                <td> time </td>
-                <td> crime type </td>
-                <td> incident </td>
-                <td> item.police grid </td>
-                <td> neighborhood_number </td>
-                <td> block </td>
-            </tr>
-            <tr v-for="item in incidents" v-if="visible_neighborhoods.includes(item.neighborhood_number)">
-                <td>{{ item.case_number }}</td>
-                <td>{{ item.date }}</td>
-                <td>{{ item.time }}</td>
-                <td>{{ code_dictionary[item.code] }}</td>
-                <td>{{ item.incident }}</td>
-                <td>{{ item.police_grid }}</td>
-                <td>{{ item.neighborhood_number }}</td>
-                <td>{{ item.block }}</td>
-            </tr>
-        </table>
+        <div class="table-wrapper">
+            <table class="fl-table">
+                <tr>
+                    <td> Case Number </td>
+                    <td> Date </td>
+                    <td> Time </td>
+                    <td> Crime Type </td>
+                    <td> Incident </td>
+                    <td> Police Grid </td>
+                    <td> Neighborhood Number </td>
+                    <td> Block </td>
+                </tr>
+                <tr v-for="item in incidents" v-if="visible_neighborhoods.includes(item.neighborhood_number)">
+                    <td>{{ item.case_number }}</td>
+                    <td>{{ item.date }}</td>
+                    <td>{{ item.time }}</td>
+                    <td>{{ code_dictionary[item.code] }}</td>
+                    <td>{{ item.incident }}</td>
+                    <td>{{ item.police_grid }}</td>
+                    <td>{{ item.neighborhood_number }}</td>
+                    <td>{{ item.block }}</td>
+                </tr>
+            </table>
+        </div>
     </div>
 
     <a href="../about.html">About the project</a>
