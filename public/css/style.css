@@ -2,13 +2,27 @@
     margin: 0 auto;
 }
 
+body {
+    background-color: #9499b0;
+}
+
+h1 {
+    text-align: center;
+}
 #leafletmap {
     width: 800px;  /* feel free to change this! */
     height: 600px; /* feel free to change this! */
 }
 
+#app {
+    text-align: center;
+}
 
-/* Table Styles */
+/*
+    Table Styles 
+    css template code thanks to: 
+    Flor Antara @ https://codepen.io/florantara
+*/
 
 .table-wrapper{
     margin: 10px 70px 70px;

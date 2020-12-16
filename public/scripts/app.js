@@ -45,7 +45,7 @@ function init() {
             incidents: [],
             search_bar: "",
             code_dictionary: {},
-            visible_neighborhoods: [1,2,3]
+            visible_neighborhoods: [1, 2, 3, 4, 5, 6, 7]
         }
 
     });
@@ -59,7 +59,8 @@ function init() {
     }).addTo(map);
     map.setMaxBounds([[44.883658, -93.217977], [45.008206, -92.993787]]);
 
-    map.on("zoomend",updateVisibleNeighborhoods);
+    //don't think we need this one.
+    //map.on("zoomend",updateVisibleNeighborhoods);
     map.on("moveend",updateVisibleNeighborhoods);
 
     let i;
@@ -97,11 +98,36 @@ function init() {
     }).catch((error) => {
         console.log('Error:', error);
     });
+    getIncidents();
+    console.log(app.visible_neighborhoods);
+}
 
+function updateVisibleNeighborhoods(){
+    
+    let seenNeighborhoods = [];
+    for(let i = 0; i < neighborhood_markers.length; i++)
+    {
+        if (neighborhood_markers[i].location[1] < map.getBounds().getEast() 
+        && neighborhood_markers[i].location[1] > map.getBounds().getWest()
+        && neighborhood_markers[i].location[0] < map.getBounds().getNorth()
+        && neighborhood_markers[i].location[0] > map.getBounds().getSouth())
+        {
+            seenNeighborhoods.push(i);
+        }
+    }
+    console.log("map interaction finished: " + seenNeighborhoods);
+    if (seenNeighborhoods.length != 0)
+        app.visible_neighborhoods = seenNeighborhoods;
+    console.log(app.visible_neighborhoods);
+}
+
+function getIncidents()
+{
     getJSON('/incidents').then((result) =>{
         app.incidents = result;
         console.log(app.incidents)
-        for(i = 0; i<neighborhood_markers.length;i++){
+        let i;
+        for(i = 0; i<app.visible_neighborhoods.length;i++){
             let j;
             let count=0;
             for(j=0;j<app.incidents.length; j++){
@@ -110,14 +136,11 @@ function init() {
                 }
             }
             neighborhood_markers[i].marker.bindPopup(count + ' total crimes');
+
         }
     }).catch((error) => {
         console.log('Error:', error);
     });
-}
-
-function updateVisibleNeighborhoods(){
-    console.log("map interaction finished");
 }
 
 function search() 

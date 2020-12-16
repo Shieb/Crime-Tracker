@@ -26,13 +26,14 @@
     <!-- End: Application -->
 </head>
 <body onload="init()">
+    <h1>Twin Cities Crime Tracker</h1>
     <!-- Main app -->
     <div id="app">
         <div id="leafletmap"></div>
-        <input type="text" v-model="search_bar" />
-        <br>
+        <input type="text" v-model="search_bar" placeholder="Search an Address"/>
         <button type="button" @click="search">Go</button>
         <p>EX:120 W Kellogg Blvd, St Paul, MN 55102</p>
+        <a href="../about.html">About the project</a>
         <br>
         <div class="table-wrapper">
             <table class="fl-table">
@@ -59,7 +60,5 @@
             </table>
         </div>
     </div>
-
-    <a href="../about.html">About the project</a>
 </body>
 </html>
