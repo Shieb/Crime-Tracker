@@ -45,7 +45,8 @@ function init() {
             incidents: [],
             search_bar: "",
             code_dictionary: {},
-            visible_neighborhoods: [1,2,3]
+            neighborhood_dictionary: {},
+            visible_neighborhoods: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
         }
 
     });
@@ -94,6 +95,12 @@ function init() {
 
     getJSON('/neighborhoods').then((result) =>{
         app.neighborhoods = result;
+        let neighborhood_dictionary = {};
+        let i;
+        for(i = 0; i<app.neighborhoods.length; i++){
+            neighborhood_dictionary[app.neighborhoods[i].id] = app.neighborhoods[i].name;
+        }
+        app.neighborhood_dictionary = neighborhood_dictionary;
     }).catch((error) => {
         console.log('Error:', error);
     });
@@ -109,7 +116,7 @@ function init() {
                     count = count + 1;
                 }
             }
-            neighborhood_markers[i].marker.bindPopup(count + ' total crimes');
+            neighborhood_markers[i].marker.bindPopup('Neighborhood ' +(i+1) + ': ' +count + ' total crimes');
         }
     }).catch((error) => {
         console.log('Error:', error);
@@ -118,6 +125,24 @@ function init() {
 
 function updateVisibleNeighborhoods(){
     console.log("map interaction finished");
+    //app.map.bounds.nw
+    let i;
+    for(i=0;i<app.visible_neighborhoods.length;i++){
+        if(neighborhood_markers[i].location[0]<app.map.bounds.nw.lat &&
+            neighborhood_markers[i].location[1]>app.map.bounds.nw.lng &&
+            neighborhood_markers[i].location[0]>app.map.bounds.se.lat &&
+            neighborhood_markers[i].location[1]<app.map.bounds.se.lng)
+            {
+                app.visible_neighborhoods[i]=i+1;
+            }
+        else{
+            app.visible_neighborhoods[i] = 1;
+        }
+    }
+
+    console.log(app.visible_neighborhoods);
+    console.log(app.map.bounds.nw);
+    console.log(app.map.bounds.se);
 }
 
 function search() 
