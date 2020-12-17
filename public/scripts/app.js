@@ -45,7 +45,8 @@ function init() {
             incidents: [],
             search_bar: "",
             code_dictionary: {},
-            visible_neighborhoods: []
+            visible_neighborhoods: [],
+            markers: []
         }
 
     });
@@ -61,13 +62,7 @@ function init() {
 
     //don't think we need this one.
     //map.on("zoomend",updateVisibleNeighborhoods);
-    map.on("moveend",updateVisibleNeighborhoods);
-
-    let i;
-    for(i = 0; i<neighborhood_markers.length;i++){
-        neighborhood_markers[i].marker = L.marker(neighborhood_markers[i].location).addTo(map);
-        //neighborhood_markers[i].marker.bindPopup('Hello');
-    }
+    map.on("moveend",updateMapIncidents);
     
     let district_boundary = new L.geoJson();
     district_boundary.addTo(map);
@@ -98,25 +93,43 @@ function init() {
         let neighborhood_dictionary = {};
         let i;
         for(i = 0; i<app.neighborhoods.length; i++){
-            neighborhood_dictionary[app.neighborhoods[i].id] = app.neighborhoods[i].name;
+            neighborhood_dictionary[app.neighborhoods[i].id] = i+1 + ": " + app.neighborhoods[i].name;
         }
         app.neighborhood_dictionary = neighborhood_dictionary;
     }).catch((error) => {
         console.log('Error:', error);
     });
-    getIncidents();
-    console.log(app.visible_neighborhoods);
+    updateMapIncidents();
 }
 
+function updateMapIncidents()
+{
+    updateVisibleNeighborhoods();
+    updateMarkers();
+    getIncidents();
+}
+
+function updateMarkers()
+{
+    while(app.markers.length > 0)
+    {
+        map.removeLayer(app.markers.pop())
+    }
+    for(let i = 0; i<app.visible_neighborhoods.length; i++){
+        app.markers.push(L.marker(neighborhood_markers[i].location).addTo(map));
+        //app.markers[i].bindPopup('Hello');
+    }
+    console.log(app.markers);
+}
 function updateVisibleNeighborhoods(){
     
     let seenNeighborhoods = [];
     for(let i = 0; i < neighborhood_markers.length; i++)
     {
-        if (neighborhood_markers[i].location[1] < map.getBounds().getEast() 
-        && neighborhood_markers[i].location[1] > map.getBounds().getWest()
-        && neighborhood_markers[i].location[0] < map.getBounds().getNorth()
-        && neighborhood_markers[i].location[0] > map.getBounds().getSouth())
+        if (neighborhood_markers[i].location[1] - 0.02 < map.getBounds().getEast() 
+        && neighborhood_markers[i].location[1] + 0.02 > map.getBounds().getWest()
+        && neighborhood_markers[i].location[0] - 0.02 < map.getBounds().getNorth()
+        && neighborhood_markers[i].location[0] + 0.02 > map.getBounds().getSouth())
         {
             seenNeighborhoods.push(i);
         }
@@ -124,28 +137,55 @@ function updateVisibleNeighborhoods(){
     console.log("map interaction finished: " + seenNeighborhoods);
     if (seenNeighborhoods.length != 0)
         app.visible_neighborhoods = seenNeighborhoods;
-    console.log(app.visible_neighborhoods);
 }
 
 function getIncidents()
 {
-    getJSON('/incidents').then((result) =>{
-        app.incidents = result;
-        console.log(app.incidents)
-        let i;
-        for(i = 0; i<app.visible_neighborhoods.length;i++){
-            let j;
-            let count=0;
-            for(j=0;j<app.incidents.length; j++){
-                if(i+1== app.incidents[j].neighborhood_number){
-                    count = count + 1;
-                }
-            }
-            neighborhood_markers[i].marker.bindPopup('Neighborhood ' +(i+1) + ': ' +count + ' total crimes');
+    if (app.visible_neighborhoods.length > 0)
+    {
+        let incSearch = "/incidents?id=" + (app.visible_neighborhoods[0] + 1);
+        for(let i = 1; i < app.visible_neighborhoods.length; i++)
+        {
+            incSearch = incSearch + "," + (app.visible_neighborhoods[i] + 1);
         }
-    }).catch((error) => {
-        console.log('Error:', error);
-    });
+        getJSON(incSearch).then((result) =>{
+            app.incidents = result;
+
+            let i;
+            for(i = 0; i<app.visible_neighborhoods.length;i++){
+                let j;
+                let count=0;
+                for(j=0;j<app.incidents.length; j++){
+                    if(i+1== app.incidents[j].neighborhood_number){
+                        count = count + 1;
+                    }
+                }
+                app.markers[i].bindPopup('Neighborhood ' +(i+1) + ': ' +count + ' total crimes');
+            }
+        }).catch((error) => {
+            console.log('Error:', error);
+        });
+    }
+    else
+    {
+        getJSON('/incidents').then((result) =>{
+            app.incidents = result;
+
+            let i;
+            for(i = 0; i<app.visible_neighborhoods.length;i++){
+                let j;
+                let count=0;
+                for(j=0;j<app.incidents.length; j++){
+                    if(i+1== app.incidents[j].neighborhood_number){
+                        count = count + 1;
+                    }
+                }
+                neighborhood_markers[i].marker.bindPopup('Neighborhood ' +(i+1) + ': ' +count + ' total crimes');
+            }
+        }).catch((error) => {
+            console.log('Error:', error);
+        });
+    }
 }
 
 function search() 
