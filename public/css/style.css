@@ -1,7 +1,9 @@
 * {
     margin: 0 auto;
 }
-
+.box {
+    height: 300px;
+}
 body {
     background-color: #9499b0;
 }
@@ -10,12 +12,14 @@ h1 {
     text-align: center;
 }
 
-h3 {
-    font-size: 24;
+h3, h4 {
+    font-size: 24px;
 }
-#about {
-    font-size: 18;
+
+h5, h6{
+    font-size: 18px;
 }
+
 #leafletmap {
     width: 800px;  /* feel free to change this! */
     height: 600px; /* feel free to change this! */

@@ -180,7 +180,8 @@ app.get('/incidents', (req, res) => {
 
     }
 
-    console.log("Search params: " + params);
+    //console.log("Search params: " + params);
+    console.log("Searching database")
     sql = sql + ') ORDER BY date_time DESC;';
     if (search)
     {
