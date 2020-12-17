@@ -45,7 +45,7 @@ function init() {
             incidents: [],
             search_bar: "",
             code_dictionary: {},
-            visible_neighborhoods: [1, 2, 3, 4, 5, 6, 7]
+            visible_neighborhoods: []
         }
 
     });
@@ -95,6 +95,12 @@ function init() {
 
     getJSON('/neighborhoods').then((result) =>{
         app.neighborhoods = result;
+        let neighborhood_dictionary = {};
+        let i;
+        for(i = 0; i<app.neighborhoods.length; i++){
+            neighborhood_dictionary[app.neighborhoods[i].id] = app.neighborhoods[i].name;
+        }
+        app.neighborhood_dictionary = neighborhood_dictionary;
     }).catch((error) => {
         console.log('Error:', error);
     });
@@ -135,8 +141,7 @@ function getIncidents()
                     count = count + 1;
                 }
             }
-            neighborhood_markers[i].marker.bindPopup(count + ' total crimes');
-
+            neighborhood_markers[i].marker.bindPopup('Neighborhood ' +(i+1) + ': ' +count + ' total crimes');
         }
     }).catch((error) => {
         console.log('Error:', error);
