@@ -13,6 +13,9 @@ h1 {
 h3 {
     font-size: 24;
 }
+#about {
+    font-size: 18;
+}
 #leafletmap {
     width: 800px;  /* feel free to change this! */
     height: 600px; /* feel free to change this! */
