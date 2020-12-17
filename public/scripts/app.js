@@ -45,6 +45,7 @@ function init() {
             incidents: [],
             search_bar: "",
             code_dictionary: {},
+            neighborhood_dictionary: {},
             visible_neighborhoods: [],
             markers: []
         }
@@ -160,7 +161,8 @@ function getIncidents()
                         count = count + 1;
                     }
                 }
-                app.markers[i].bindPopup('Neighborhood ' +(i+1) + ': ' +count + ' total crimes');
+                //app.markers[i].bindPopup('Neighborhood ' +(i+1) + ': ' +count + ' total crimes');
+                app.markers[i].bindPopup(app.neighborhood_dictionary[i+1] + ': ' +count + ' total crimes');
             }
         }).catch((error) => {
             console.log('Error:', error);
