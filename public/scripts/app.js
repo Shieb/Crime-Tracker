@@ -120,7 +120,6 @@ function updateMarkers()
         app.markers.push(L.marker(neighborhood_markers[i].location).addTo(map));
         //app.markers[i].bindPopup('Hello');
     }
-    console.log(app.markers);
 }
 function updateVisibleNeighborhoods(){
     
